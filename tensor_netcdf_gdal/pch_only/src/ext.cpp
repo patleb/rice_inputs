@@ -1,0 +1,424 @@
+// before_include
+// include
+#include "precompiled.hpp"
+#include "all.hpp"
+// after_include
+using namespace NetCDF;
+using namespace GDAL;
+using namespace Rice;
+
+
+
+
+extern "C" void Init_ext() {
+  // before_initialize
+  GDALAllRegister();
+  // initialize
+  Module rb_mC = define_module("C");
+  rb_mC.define_constant("DOUBLE_SAFE_INT64", DOUBLE_SAFE_INT64);
+  rb_mC.define_constant("FLOAT_SAFE_INT32", FLOAT_SAFE_INT32);
+  Data_Type<Bitset> rb_cBitset = define_class<Bitset>("Bitset");
+  rb_cBitset.define_constructor(Constructor<Bitset, const Bitset&>());
+  rb_cBitset.define_constructor(Constructor<Bitset, size_t>(), Arg("count"));
+  rb_cBitset.define_constructor(Constructor<Bitset, const Vbool &>(), Arg("bools"));
+  using rb_bitset_operator00_1 = bool (Bitset::*)(size_t i) const;
+  rb_cBitset.define_method<rb_bitset_operator00_1>("[]", &Bitset::operator[]);
+  rb_cBitset.define_method("[]=", [](Bitset & self, size_t i, bool value) -> bool {
+    self[i] = value;
+    return value;
+  });
+  using rb_bitset_front_1 = bool (Bitset::*)() const;
+  rb_cBitset.define_method<rb_bitset_front_1>("first", &Bitset::front);
+  using rb_bitset_back_1 = bool (Bitset::*)() const;
+  rb_cBitset.define_method<rb_bitset_back_1>("last", &Bitset::back);
+  rb_cBitset.define_method("size", &Bitset::size);
+  rb_cBitset.define_method("to_s", &Bitset::to_s);
+  Module rb_mTensor = define_module("Tensor");
+  Enum<Tensor::Type> rb_eTensor_dc_Type = define_enum_under<Tensor::Type>("Type", rb_mTensor);
+  rb_eTensor_dc_Type.define_value("Int32", Tensor::Type::Int32);
+  rb_eTensor_dc_Type.define_value("Int64", Tensor::Type::Int64);
+  rb_eTensor_dc_Type.define_value("SFloat", Tensor::Type::SFloat);
+  rb_eTensor_dc_Type.define_value("DFloat", Tensor::Type::DFloat);
+  rb_eTensor_dc_Type.define_value("UInt8", Tensor::Type::UInt8);
+  rb_eTensor_dc_Type.define_value("UInt32", Tensor::Type::UInt32);
+  Data_Type<Tensor::Base> rb_cTensor_dc_Base = define_class_under<Tensor::Base>(rb_mTensor, "Base");
+  rb_cTensor_dc_Base.define_attr("size", &Tensor::Base::size, AttrAccess::Read);
+  rb_cTensor_dc_Base.define_attr("rank", &Tensor::Base::rank, AttrAccess::Read);
+  rb_cTensor_dc_Base.define_attr("type", &Tensor::Base::type, AttrAccess::Read);
+  rb_cTensor_dc_Base.define_method("shape", &Tensor::Base::_shape_);
+  rb_cTensor_dc_Base.define_method("offsets", &Tensor::Base::_offsets_);
+  Data_Type<Tensor::Int32> rb_cTensor_dc_Int32 = define_class_under<Tensor::Int32, Tensor::Base>(rb_mTensor, "Int32");
+  rb_cTensor_dc_Int32.define_attr("fill_value", &Tensor::Int32::fill_value);
+  rb_cTensor_dc_Int32.define_singleton_function("from_sql", &Tensor::Int32::from_sql);
+  rb_cTensor_dc_Int32.define_constructor(Constructor<Tensor::Int32, const Tensor::Int32&>());
+  rb_cTensor_dc_Int32.define_constructor(Constructor<Tensor::Int32, const Vsize_t &, const Oint32_t &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_Int32.define_constructor(Constructor<Tensor::Int32, const Vint32_t &, const Vsize_t &, const Oint32_t &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_Int32.define_method("==", &Tensor::Int32::operator==);
+  using rb_tensor_int32_operator00_1 = const int32_t & (Tensor::Int32::*)(size_t i) const;
+  rb_cTensor_dc_Int32.define_method<rb_tensor_int32_operator00_1>("[]", &Tensor::Int32::operator[]);
+  using rb_tensor_int32_operator00_2 = const int32_t & (Tensor::Int32::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_Int32.define_method<rb_tensor_int32_operator00_2>("[]", &Tensor::Int32::operator[]);
+  rb_cTensor_dc_Int32.define_method("[]=", [](Tensor::Int32 & self, const Vsize_t & indexes, const int32_t & value) -> const int32_t & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_int32_front_1 = const int32_t & (Tensor::Int32::*)() const;
+  rb_cTensor_dc_Int32.define_method<rb_tensor_int32_front_1>("first", &Tensor::Int32::front);
+  using rb_tensor_int32_back_1 = const int32_t & (Tensor::Int32::*)() const;
+  rb_cTensor_dc_Int32.define_method<rb_tensor_int32_back_1>("last", &Tensor::Int32::back);
+  using rb_tensor_int32_slice_1 = Tensor::Int32 (Tensor::Int32::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_Int32.define_method<rb_tensor_int32_slice_1>("slice", &Tensor::Int32::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_Int32.define_method("values", &Tensor::Int32::values);
+  rb_cTensor_dc_Int32.define_method("refill_value", [](Tensor::Int32 & self, int32_t fill_value) -> Tensor::Int32 & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_Int32.define_method("reshape", [](Tensor::Int32 & self, const Vsize_t & shape) -> Tensor::Int32 & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_Int32.define_method("seq", [](Tensor::Int32 & self, const Oint32_t & start) -> Tensor::Int32 & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_Int32.define_method("to_sql", &Tensor::Int32::to_sql);
+  rb_cTensor_dc_Int32.define_method("to_string", &Tensor::Int32::to_string);
+  Data_Type<Tensor::Int64> rb_cTensor_dc_Int64 = define_class_under<Tensor::Int64, Tensor::Base>(rb_mTensor, "Int64");
+  rb_cTensor_dc_Int64.define_attr("fill_value", &Tensor::Int64::fill_value);
+  rb_cTensor_dc_Int64.define_singleton_function("from_sql", &Tensor::Int64::from_sql);
+  rb_cTensor_dc_Int64.define_constructor(Constructor<Tensor::Int64, const Tensor::Int64&>());
+  rb_cTensor_dc_Int64.define_constructor(Constructor<Tensor::Int64, const Vsize_t &, const Oint64_t2 &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_Int64.define_constructor(Constructor<Tensor::Int64, const Vint64_t2 &, const Vsize_t &, const Oint64_t2 &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_Int64.define_method("==", &Tensor::Int64::operator==);
+  using rb_tensor_int64_operator00_1 = const int64_t2 & (Tensor::Int64::*)(size_t i) const;
+  rb_cTensor_dc_Int64.define_method<rb_tensor_int64_operator00_1>("[]", &Tensor::Int64::operator[]);
+  using rb_tensor_int64_operator00_2 = const int64_t2 & (Tensor::Int64::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_Int64.define_method<rb_tensor_int64_operator00_2>("[]", &Tensor::Int64::operator[]);
+  rb_cTensor_dc_Int64.define_method("[]=", [](Tensor::Int64 & self, const Vsize_t & indexes, const int64_t2 & value) -> const int64_t2 & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_int64_front_1 = const int64_t2 & (Tensor::Int64::*)() const;
+  rb_cTensor_dc_Int64.define_method<rb_tensor_int64_front_1>("first", &Tensor::Int64::front);
+  using rb_tensor_int64_back_1 = const int64_t2 & (Tensor::Int64::*)() const;
+  rb_cTensor_dc_Int64.define_method<rb_tensor_int64_back_1>("last", &Tensor::Int64::back);
+  using rb_tensor_int64_slice_1 = Tensor::Int64 (Tensor::Int64::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_Int64.define_method<rb_tensor_int64_slice_1>("slice", &Tensor::Int64::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_Int64.define_method("values", &Tensor::Int64::values);
+  rb_cTensor_dc_Int64.define_method("refill_value", [](Tensor::Int64 & self, int64_t2 fill_value) -> Tensor::Int64 & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_Int64.define_method("reshape", [](Tensor::Int64 & self, const Vsize_t & shape) -> Tensor::Int64 & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_Int64.define_method("seq", [](Tensor::Int64 & self, const Oint64_t2 & start) -> Tensor::Int64 & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_Int64.define_method("to_sql", &Tensor::Int64::to_sql);
+  rb_cTensor_dc_Int64.define_method("to_string", &Tensor::Int64::to_string);
+  Data_Type<Tensor::SFloat> rb_cTensor_dc_SFloat = define_class_under<Tensor::SFloat, Tensor::Base>(rb_mTensor, "SFloat");
+  rb_cTensor_dc_SFloat.define_attr("fill_value", &Tensor::SFloat::fill_value);
+  rb_cTensor_dc_SFloat.define_singleton_function("from_sql", &Tensor::SFloat::from_sql);
+  rb_cTensor_dc_SFloat.define_constructor(Constructor<Tensor::SFloat, const Tensor::SFloat&>());
+  rb_cTensor_dc_SFloat.define_constructor(Constructor<Tensor::SFloat, const Vsize_t &, const Ofloat &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_SFloat.define_constructor(Constructor<Tensor::SFloat, const Vfloat &, const Vsize_t &, const Ofloat &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_SFloat.define_method("==", &Tensor::SFloat::operator==);
+  using rb_tensor_s_float_operator00_1 = const float & (Tensor::SFloat::*)(size_t i) const;
+  rb_cTensor_dc_SFloat.define_method<rb_tensor_s_float_operator00_1>("[]", &Tensor::SFloat::operator[]);
+  using rb_tensor_s_float_operator00_2 = const float & (Tensor::SFloat::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_SFloat.define_method<rb_tensor_s_float_operator00_2>("[]", &Tensor::SFloat::operator[]);
+  rb_cTensor_dc_SFloat.define_method("[]=", [](Tensor::SFloat & self, const Vsize_t & indexes, const float & value) -> const float & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_s_float_front_1 = const float & (Tensor::SFloat::*)() const;
+  rb_cTensor_dc_SFloat.define_method<rb_tensor_s_float_front_1>("first", &Tensor::SFloat::front);
+  using rb_tensor_s_float_back_1 = const float & (Tensor::SFloat::*)() const;
+  rb_cTensor_dc_SFloat.define_method<rb_tensor_s_float_back_1>("last", &Tensor::SFloat::back);
+  using rb_tensor_s_float_slice_1 = Tensor::SFloat (Tensor::SFloat::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_SFloat.define_method<rb_tensor_s_float_slice_1>("slice", &Tensor::SFloat::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_SFloat.define_method("values", &Tensor::SFloat::values);
+  rb_cTensor_dc_SFloat.define_method("refill_value", [](Tensor::SFloat & self, float fill_value) -> Tensor::SFloat & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_SFloat.define_method("reshape", [](Tensor::SFloat & self, const Vsize_t & shape) -> Tensor::SFloat & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_SFloat.define_method("seq", [](Tensor::SFloat & self, const Ofloat & start) -> Tensor::SFloat & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_SFloat.define_method("to_sql", &Tensor::SFloat::to_sql);
+  rb_cTensor_dc_SFloat.define_method("to_string", &Tensor::SFloat::to_string);
+  Data_Type<Tensor::DFloat> rb_cTensor_dc_DFloat = define_class_under<Tensor::DFloat, Tensor::Base>(rb_mTensor, "DFloat");
+  rb_cTensor_dc_DFloat.define_attr("fill_value", &Tensor::DFloat::fill_value);
+  rb_cTensor_dc_DFloat.define_singleton_function("from_sql", &Tensor::DFloat::from_sql);
+  rb_cTensor_dc_DFloat.define_constructor(Constructor<Tensor::DFloat, const Tensor::DFloat&>());
+  rb_cTensor_dc_DFloat.define_constructor(Constructor<Tensor::DFloat, const Vsize_t &, const Odouble &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_DFloat.define_constructor(Constructor<Tensor::DFloat, const Vdouble &, const Vsize_t &, const Odouble &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_DFloat.define_method("==", &Tensor::DFloat::operator==);
+  using rb_tensor_d_float_operator00_1 = const double & (Tensor::DFloat::*)(size_t i) const;
+  rb_cTensor_dc_DFloat.define_method<rb_tensor_d_float_operator00_1>("[]", &Tensor::DFloat::operator[]);
+  using rb_tensor_d_float_operator00_2 = const double & (Tensor::DFloat::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_DFloat.define_method<rb_tensor_d_float_operator00_2>("[]", &Tensor::DFloat::operator[]);
+  rb_cTensor_dc_DFloat.define_method("[]=", [](Tensor::DFloat & self, const Vsize_t & indexes, const double & value) -> const double & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_d_float_front_1 = const double & (Tensor::DFloat::*)() const;
+  rb_cTensor_dc_DFloat.define_method<rb_tensor_d_float_front_1>("first", &Tensor::DFloat::front);
+  using rb_tensor_d_float_back_1 = const double & (Tensor::DFloat::*)() const;
+  rb_cTensor_dc_DFloat.define_method<rb_tensor_d_float_back_1>("last", &Tensor::DFloat::back);
+  using rb_tensor_d_float_slice_1 = Tensor::DFloat (Tensor::DFloat::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_DFloat.define_method<rb_tensor_d_float_slice_1>("slice", &Tensor::DFloat::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_DFloat.define_method("values", &Tensor::DFloat::values);
+  rb_cTensor_dc_DFloat.define_method("refill_value", [](Tensor::DFloat & self, double fill_value) -> Tensor::DFloat & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_DFloat.define_method("reshape", [](Tensor::DFloat & self, const Vsize_t & shape) -> Tensor::DFloat & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_DFloat.define_method("seq", [](Tensor::DFloat & self, const Odouble & start) -> Tensor::DFloat & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_DFloat.define_method("to_sql", &Tensor::DFloat::to_sql);
+  rb_cTensor_dc_DFloat.define_method("to_string", &Tensor::DFloat::to_string);
+  Data_Type<Tensor::UInt8> rb_cTensor_dc_UInt8 = define_class_under<Tensor::UInt8, Tensor::Base>(rb_mTensor, "UInt8");
+  rb_cTensor_dc_UInt8.define_attr("fill_value", &Tensor::UInt8::fill_value);
+  rb_cTensor_dc_UInt8.define_singleton_function("from_sql", &Tensor::UInt8::from_sql);
+  rb_cTensor_dc_UInt8.define_constructor(Constructor<Tensor::UInt8, const Tensor::UInt8&>());
+  rb_cTensor_dc_UInt8.define_constructor(Constructor<Tensor::UInt8, const Vsize_t &, const Ouint8_t &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_UInt8.define_constructor(Constructor<Tensor::UInt8, const Vuint8_t &, const Vsize_t &, const Ouint8_t &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_UInt8.define_method("==", &Tensor::UInt8::operator==);
+  using rb_tensor_u_int8_operator00_1 = const uint8_t & (Tensor::UInt8::*)(size_t i) const;
+  rb_cTensor_dc_UInt8.define_method<rb_tensor_u_int8_operator00_1>("[]", &Tensor::UInt8::operator[]);
+  using rb_tensor_u_int8_operator00_2 = const uint8_t & (Tensor::UInt8::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_UInt8.define_method<rb_tensor_u_int8_operator00_2>("[]", &Tensor::UInt8::operator[]);
+  rb_cTensor_dc_UInt8.define_method("[]=", [](Tensor::UInt8 & self, const Vsize_t & indexes, const uint8_t & value) -> const uint8_t & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_u_int8_front_1 = const uint8_t & (Tensor::UInt8::*)() const;
+  rb_cTensor_dc_UInt8.define_method<rb_tensor_u_int8_front_1>("first", &Tensor::UInt8::front);
+  using rb_tensor_u_int8_back_1 = const uint8_t & (Tensor::UInt8::*)() const;
+  rb_cTensor_dc_UInt8.define_method<rb_tensor_u_int8_back_1>("last", &Tensor::UInt8::back);
+  using rb_tensor_u_int8_slice_1 = Tensor::UInt8 (Tensor::UInt8::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_UInt8.define_method<rb_tensor_u_int8_slice_1>("slice", &Tensor::UInt8::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_UInt8.define_method("values", &Tensor::UInt8::values);
+  rb_cTensor_dc_UInt8.define_method("refill_value", [](Tensor::UInt8 & self, uint8_t fill_value) -> Tensor::UInt8 & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_UInt8.define_method("reshape", [](Tensor::UInt8 & self, const Vsize_t & shape) -> Tensor::UInt8 & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_UInt8.define_method("seq", [](Tensor::UInt8 & self, const Ouint8_t & start) -> Tensor::UInt8 & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_UInt8.define_method("to_sql", &Tensor::UInt8::to_sql);
+  rb_cTensor_dc_UInt8.define_method("to_string", &Tensor::UInt8::to_string);
+  Data_Type<Tensor::UInt32> rb_cTensor_dc_UInt32 = define_class_under<Tensor::UInt32, Tensor::Base>(rb_mTensor, "UInt32");
+  rb_cTensor_dc_UInt32.define_attr("fill_value", &Tensor::UInt32::fill_value);
+  rb_cTensor_dc_UInt32.define_singleton_function("from_sql", &Tensor::UInt32::from_sql);
+  rb_cTensor_dc_UInt32.define_constructor(Constructor<Tensor::UInt32, const Tensor::UInt32&>());
+  rb_cTensor_dc_UInt32.define_constructor(Constructor<Tensor::UInt32, const Vsize_t &, const Ouint32_t &>(), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_UInt32.define_constructor(Constructor<Tensor::UInt32, const Vuint32_t &, const Vsize_t &, const Ouint32_t &>(), Arg("values"), Arg("shape"), Arg("fill_value") = nil);
+  rb_cTensor_dc_UInt32.define_method("==", &Tensor::UInt32::operator==);
+  using rb_tensor_u_int32_operator00_1 = const uint32_t & (Tensor::UInt32::*)(size_t i) const;
+  rb_cTensor_dc_UInt32.define_method<rb_tensor_u_int32_operator00_1>("[]", &Tensor::UInt32::operator[]);
+  using rb_tensor_u_int32_operator00_2 = const uint32_t & (Tensor::UInt32::*)(const Vsize_t & indexes) const;
+  rb_cTensor_dc_UInt32.define_method<rb_tensor_u_int32_operator00_2>("[]", &Tensor::UInt32::operator[]);
+  rb_cTensor_dc_UInt32.define_method("[]=", [](Tensor::UInt32 & self, const Vsize_t & indexes, const uint32_t & value) -> const uint32_t & {
+    self[indexes] = value;
+    return value;
+  });
+  using rb_tensor_u_int32_front_1 = const uint32_t & (Tensor::UInt32::*)() const;
+  rb_cTensor_dc_UInt32.define_method<rb_tensor_u_int32_front_1>("first", &Tensor::UInt32::front);
+  using rb_tensor_u_int32_back_1 = const uint32_t & (Tensor::UInt32::*)() const;
+  rb_cTensor_dc_UInt32.define_method<rb_tensor_u_int32_back_1>("last", &Tensor::UInt32::back);
+  using rb_tensor_u_int32_slice_1 = Tensor::UInt32 (Tensor::UInt32::*)(const Vsize_t &, const Vsize_t &, const Vsize_t &) const;
+  rb_cTensor_dc_UInt32.define_method<rb_tensor_u_int32_slice_1>("slice", &Tensor::UInt32::slice, Arg("start") = Vsize_t(), Arg("count") = Vsize_t(), Arg("stride") = Vsize_t());
+  rb_cTensor_dc_UInt32.define_method("values", &Tensor::UInt32::values);
+  rb_cTensor_dc_UInt32.define_method("refill_value", [](Tensor::UInt32 & self, uint32_t fill_value) -> Tensor::UInt32 & {
+    self.refill_value(fill_value);
+    return self;
+  });
+  rb_cTensor_dc_UInt32.define_method("reshape", [](Tensor::UInt32 & self, const Vsize_t & shape) -> Tensor::UInt32 & {
+    self.reshape(shape);
+    return self;
+  });
+  rb_cTensor_dc_UInt32.define_method("seq", [](Tensor::UInt32 & self, const Ouint32_t & start) -> Tensor::UInt32 & {
+    self.seq(start);
+    return self;
+  });
+  rb_cTensor_dc_UInt32.define_method("to_sql", &Tensor::UInt32::to_sql);
+  rb_cTensor_dc_UInt32.define_method("to_string", &Tensor::UInt32::to_string);
+  Module rb_mPROJ = define_module("PROJ");
+  rb_mPROJ.define_singleton_function("version", &PROJ::version);
+  Module rb_mGDAL = define_module("GDAL");
+  rb_mGDAL.define_singleton_function("version", &GDAL::version);
+  Data_Type<GDAL::Base> rb_cGDAL_dc_Base = define_class_under<GDAL::Base>(rb_mGDAL, "Base");
+  rb_cGDAL_dc_Base.define_singleton_function("srid", &GDAL::Base::_srid_);
+  rb_cGDAL_dc_Base.define_singleton_function("wkt", &GDAL::Base::_wkt_);
+  rb_cGDAL_dc_Base.define_singleton_function("proj4", &GDAL::Base::_proj4_);
+  rb_cGDAL_dc_Base.define_singleton_function("orientation", &GDAL::Base::_orientation_);
+  rb_cGDAL_dc_Base.define_method("srid", &GDAL::Base::srid);
+  rb_cGDAL_dc_Base.define_method("wkt", &GDAL::Base::wkt);
+  rb_cGDAL_dc_Base.define_method("proj4", &GDAL::Base::proj4);
+  rb_cGDAL_dc_Base.define_method("orientation", &GDAL::Base::orientation);
+  Data_Type<GDAL::Vector> rb_cGDAL_dc_Vector = define_class_under<GDAL::Vector, GDAL::Base>(rb_mGDAL, "Vector");
+  rb_cGDAL_dc_Vector.define_attr("size", &GDAL::Vector::size, AttrAccess::Read);
+  rb_cGDAL_dc_Vector.define_constructor(Constructor<GDAL::Vector, const GDAL::Vector&>());
+  rb_cGDAL_dc_Vector.define_constructor(Constructor<GDAL::Vector, const Vdouble &, const Vdouble &, const Ostring &>(), Arg("x"), Arg("y"), Arg("proj") = nil);
+  rb_cGDAL_dc_Vector.define_method("x", &GDAL::Vector::_x_);
+  rb_cGDAL_dc_Vector.define_method("y", &GDAL::Vector::_y_);
+  rb_cGDAL_dc_Vector.define_method("points", &GDAL::Vector::points);
+  rb_cGDAL_dc_Vector.define_method("reproject", &GDAL::Vector::reproject);
+  Data_Type<GDAL::Raster> rb_cGDAL_dc_Raster = define_class_under<GDAL::Raster, GDAL::Base>(rb_mGDAL, "Raster");
+  Data_Type<GDAL::Raster::Transform> rb_cGDAL_dc_Raster_dc_Transform = define_class_under<GDAL::Raster::Transform>(rb_cGDAL_dc_Raster, "Transform");
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("width", &GDAL::Raster::Transform::width, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("height", &GDAL::Raster::Transform::height, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("x0", &GDAL::Raster::Transform::x0, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("y0", &GDAL::Raster::Transform::y0, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("dx", &GDAL::Raster::Transform::dx, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("dy", &GDAL::Raster::Transform::dy, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("rx", &GDAL::Raster::Transform::rx, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_attr("ry", &GDAL::Raster::Transform::ry, AttrAccess::Read);
+  rb_cGDAL_dc_Raster_dc_Transform.define_method("mesh", &GDAL::Raster::Transform::_mesh_);
+  rb_cGDAL_dc_Raster_dc_Transform.define_method("shape", &GDAL::Raster::Transform::shape);
+  rb_cGDAL_dc_Raster_dc_Transform.define_method("cache_key", &GDAL::Raster::Transform::cache_key);
+  rb_cGDAL_dc_Raster.define_attr("width", &GDAL::Raster::width, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_attr("height", &GDAL::Raster::height, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_attr("x0", &GDAL::Raster::x0, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_attr("y0", &GDAL::Raster::y0, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_attr("dx", &GDAL::Raster::dx, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_attr("dy", &GDAL::Raster::dy, AttrAccess::Read);
+  rb_cGDAL_dc_Raster.define_constructor(Constructor<GDAL::Raster, const GDAL::Raster&>());
+  rb_cGDAL_dc_Raster.define_constructor(Constructor<GDAL::Raster, Tensor::Base &, Tensor::Type, const Vdouble &, const Ostring &>(), Arg("z"), Arg("type"), Arg("x01_y01"), Arg("proj") = nil);
+  rb_cGDAL_dc_Raster.define_method("fill_value", &GDAL::Raster::fill_value);
+  rb_cGDAL_dc_Raster.define_method("shape", &GDAL::Raster::shape);
+  rb_cGDAL_dc_Raster.define_method("type", &GDAL::Raster::type);
+  rb_cGDAL_dc_Raster.define_method("x", &GDAL::Raster::x);
+  rb_cGDAL_dc_Raster.define_method("y", &GDAL::Raster::y);
+  rb_cGDAL_dc_Raster.define_method("z", &GDAL::Raster::_z_);
+  rb_cGDAL_dc_Raster.define_method("reproject", &GDAL::Raster::reproject);
+  rb_cGDAL_dc_Raster.define_method("transform_for", &GDAL::Raster::transform_for);
+  Module rb_mNetCDF = define_module("NetCDF");
+  rb_mNetCDF.define_constant("NULL_ID", NULL_ID);
+  rb_mNetCDF.define_constant("GLOBAL", NC_GLOBAL);
+  rb_mNetCDF.define_constant("NOWRITE", NC_NOWRITE);
+  rb_mNetCDF.define_constant("WRITE", NC_WRITE);
+  rb_mNetCDF.define_constant("CLOBBER", NC_CLOBBER);
+  rb_mNetCDF.define_constant("NOCLOBBER", NC_NOCLOBBER);
+  rb_mNetCDF.define_constant("CLASSIC_MODEL", NC_CLASSIC_MODEL);
+  rb_mNetCDF.define_constant("SHARE", NC_SHARE);
+  rb_mNetCDF.define_constant("NETCDF4", NC_NETCDF4);
+  rb_mNetCDF.define_constant("UNLIMITED", NC_UNLIMITED);
+  rb_mNetCDF.define_constant("FILL_STRING", NC_FILL_CHAR);
+  rb_mNetCDF.define_constant("FILL_INT8", NC_FILL_BYTE);
+  rb_mNetCDF.define_constant("FILL_INT16", NC_FILL_SHORT);
+  rb_mNetCDF.define_constant("FILL_INT32", NC_FILL_INT);
+  rb_mNetCDF.define_constant("FILL_INT64", NC_FILL_INT64);
+  rb_mNetCDF.define_constant("FILL_SFLOAT", NC_FILL_FLOAT);
+  rb_mNetCDF.define_constant("FILL_DFLOAT", NC_FILL_DOUBLE);
+  rb_mNetCDF.define_constant("FILL_UINT8", NC_FILL_UBYTE);
+  rb_mNetCDF.define_constant("FILL_UINT16", NC_FILL_USHORT);
+  rb_mNetCDF.define_constant("FILL_UINT32", NC_FILL_UINT);
+  rb_mNetCDF.define_constant("FILL_UINT64", NC_FILL_UINT64);
+  Enum<NetCDF::Type> rb_eNetCDF_dc_Type = define_enum_under<NetCDF::Type>("Type", rb_mNetCDF);
+  rb_eNetCDF_dc_Type.define_value("Int32", NetCDF::Type::Int32);
+  rb_eNetCDF_dc_Type.define_value("Int64", NetCDF::Type::Int64);
+  rb_eNetCDF_dc_Type.define_value("SFloat", NetCDF::Type::SFloat);
+  rb_eNetCDF_dc_Type.define_value("DFloat", NetCDF::Type::DFloat);
+  rb_eNetCDF_dc_Type.define_value("UInt8", NetCDF::Type::UInt8);
+  rb_eNetCDF_dc_Type.define_value("UInt32", NetCDF::Type::UInt32);
+  rb_eNetCDF_dc_Type.define_value("String", NetCDF::Type::String);
+  rb_mNetCDF.define_singleton_function("version", &NetCDF::version);
+  Data_Type<NetCDF::Base> rb_cNetCDF_dc_Base = define_class_under<NetCDF::Base>(rb_mNetCDF, "Base");
+  rb_cNetCDF_dc_Base.define_attr("id", &NetCDF::Base::id, AttrAccess::Read);
+  Data_Type<NetCDF::File> rb_cNetCDF_dc_File = define_class_under<NetCDF::File, NetCDF::Base>(rb_mNetCDF, "File");
+  rb_cNetCDF_dc_File.define_attr("path", &NetCDF::File::path, AttrAccess::Read);
+  rb_cNetCDF_dc_File.define_attr("mode", &NetCDF::File::mode, AttrAccess::Read);
+  rb_cNetCDF_dc_File.define_attr("flags", &NetCDF::File::flags, AttrAccess::Read);
+  rb_cNetCDF_dc_File.define_constructor(Constructor<NetCDF::File>());
+  rb_cNetCDF_dc_File.define_constructor(Constructor<NetCDF::File, const string &, Ostring, Obool, Obool, Obool>(), Arg("path"), Arg("mode") = nil, Arg("nc4_classic") = nil, Arg("classic") = nil, Arg("share") = nil);
+  rb_cNetCDF_dc_File.define_method("open", &NetCDF::File::open);
+  rb_cNetCDF_dc_File.define_method("close", &NetCDF::File::close);
+  rb_cNetCDF_dc_File.define_method("closed?", &NetCDF::File::is_closed);
+  rb_cNetCDF_dc_File.define_method("sync", &NetCDF::File::sync);
+  rb_cNetCDF_dc_File.define_method("format", &NetCDF::File::format);
+  rb_cNetCDF_dc_File.define_method("dims", &NetCDF::File::dims);
+  rb_cNetCDF_dc_File.define_method("vars", &NetCDF::File::vars);
+  rb_cNetCDF_dc_File.define_method("atts", &NetCDF::File::atts);
+  rb_cNetCDF_dc_File.define_method("dim", &NetCDF::File::dim);
+  rb_cNetCDF_dc_File.define_method("var", &NetCDF::File::var);
+  rb_cNetCDF_dc_File.define_method("att", &NetCDF::File::att);
+  rb_cNetCDF_dc_File.define_method("create_dim", &NetCDF::File::create_dim);
+  rb_cNetCDF_dc_File.define_method("create_var", &NetCDF::File::create_var);
+  rb_cNetCDF_dc_File.define_method("write_att", &NetCDF::File::write_att);
+  rb_cNetCDF_dc_File.define_method("write_att_s", &NetCDF::File::write_att_s);
+  rb_cNetCDF_dc_File.define_method("set_define_mode", &NetCDF::File::set_define_mode);
+  rb_cNetCDF_dc_File.define_method("set_fill", &NetCDF::File::set_fill);
+  Data_Type<NetCDF::BelongsToFile> rb_cNetCDF_dc_BelongsToFile = define_class_under<NetCDF::BelongsToFile, NetCDF::Base>(rb_mNetCDF, "BelongsToFile");
+  rb_cNetCDF_dc_BelongsToFile.define_attr("file_id", &NetCDF::BelongsToFile::file_id, AttrAccess::Read);
+  Data_Type<NetCDF::Dim> rb_cNetCDF_dc_Dim = define_class_under<NetCDF::Dim, NetCDF::BelongsToFile>(rb_mNetCDF, "Dim");
+  rb_cNetCDF_dc_Dim.define_constructor(Constructor<NetCDF::Dim, const NetCDF::Dim&>());
+  rb_cNetCDF_dc_Dim.define_method("name", &NetCDF::Dim::name);
+  rb_cNetCDF_dc_Dim.define_method("name=", &NetCDF::Dim::rename);
+  rb_cNetCDF_dc_Dim.define_method("unlimited?", &NetCDF::Dim::is_unlimited);
+  rb_cNetCDF_dc_Dim.define_method("size", &NetCDF::Dim::size);
+  Data_Type<NetCDF::Att> rb_cNetCDF_dc_Att = define_class_under<NetCDF::Att, NetCDF::BelongsToFile>(rb_mNetCDF, "Att");
+  rb_cNetCDF_dc_Att.define_attr("var_id", &NetCDF::Att::var_id, AttrAccess::Read);
+  rb_cNetCDF_dc_Att.define_attr("name", &NetCDF::Att::name, AttrAccess::Read);
+  rb_cNetCDF_dc_Att.define_constructor(Constructor<NetCDF::Att, const NetCDF::Att&>());
+  rb_cNetCDF_dc_Att.define_method("name=", &NetCDF::Att::rename);
+  rb_cNetCDF_dc_Att.define_method("type", &NetCDF::Att::type);
+  rb_cNetCDF_dc_Att.define_method("size", &NetCDF::Att::size);
+  rb_cNetCDF_dc_Att.define_method("read", &NetCDF::Att::read);
+  rb_cNetCDF_dc_Att.define_method("destroy", &NetCDF::Att::destroy);
+  Data_Type<NetCDF::Var> rb_cNetCDF_dc_Var = define_class_under<NetCDF::Var, NetCDF::BelongsToFile>(rb_mNetCDF, "Var");
+  rb_cNetCDF_dc_Var.define_constructor(Constructor<NetCDF::Var, const NetCDF::Var&>());
+  rb_cNetCDF_dc_Var.define_method("name", &NetCDF::Var::name);
+  rb_cNetCDF_dc_Var.define_method("name=", &NetCDF::Var::rename);
+  rb_cNetCDF_dc_Var.define_method("type", &NetCDF::Var::type);
+  rb_cNetCDF_dc_Var.define_method("dims_count", &NetCDF::Var::dims_count);
+  rb_cNetCDF_dc_Var.define_method("dims", &NetCDF::Var::dims);
+  rb_cNetCDF_dc_Var.define_method("atts", &NetCDF::Var::atts);
+  rb_cNetCDF_dc_Var.define_method("dim", &NetCDF::Var::dim);
+  rb_cNetCDF_dc_Var.define_method("att", &NetCDF::Var::att);
+  rb_cNetCDF_dc_Var.define_method("shape", &NetCDF::Var::shape);
+  rb_cNetCDF_dc_Var.define_method("write_att", &NetCDF::Var::write_att);
+  rb_cNetCDF_dc_Var.define_method("write_att_s", &NetCDF::Var::write_att_s);
+  rb_cNetCDF_dc_Var.define_method("write", &NetCDF::Var::write);
+  rb_cNetCDF_dc_Var.define_method("write_s", &NetCDF::Var::write_s);
+  rb_cNetCDF_dc_Var.define_method("read", &NetCDF::Var::read);
+  rb_cNetCDF_dc_Var.define_method("fill_value", &NetCDF::Var::fill_value);
+  rb_cNetCDF_dc_Var.define_method("set_fill_value", &NetCDF::Var::set_fill_value);
+  rb_cNetCDF_dc_Var.define_method("fill", &NetCDF::Var::fill);
+  rb_cNetCDF_dc_Var.define_method("set_fill", &NetCDF::Var::set_fill);
+  rb_cNetCDF_dc_Var.define_method("endian", &NetCDF::Var::endian);
+  rb_cNetCDF_dc_Var.define_method("set_endian", &NetCDF::Var::set_endian);
+  rb_cNetCDF_dc_Var.define_method("checksum", &NetCDF::Var::checksum);
+  rb_cNetCDF_dc_Var.define_method("set_checksum", &NetCDF::Var::set_checksum);
+  rb_cNetCDF_dc_Var.define_method("deflate", &NetCDF::Var::deflate);
+  rb_cNetCDF_dc_Var.define_method("set_deflate", &NetCDF::Var::set_deflate);
+  rb_cNetCDF_dc_Var.define_method("quantize", &NetCDF::Var::quantize);
+  rb_cNetCDF_dc_Var.define_method("set_quantize", &NetCDF::Var::set_quantize);
+  rb_cNetCDF_dc_Var.define_method("chunking", &NetCDF::Var::chunking);
+  rb_cNetCDF_dc_Var.define_method("set_chunking", &NetCDF::Var::set_chunking);
+  rb_cNetCDF_dc_Var.define_method("chunk_cache", &NetCDF::Var::chunk_cache);
+  rb_cNetCDF_dc_Var.define_method("set_chunk_cache", &NetCDF::Var::set_chunk_cache);
+
+
+  // after_initialize
+}
